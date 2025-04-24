@@ -515,11 +515,11 @@
             </reporting>
         </profile>
     </profiles>
- <distributionManagement>
+<distributionManagement>
     <repository>
         <id>central</id>
-        <name>a0qh9y2t72ku7-artifactory-primary-0-releases</name>
-        <url>https://preethidevopsdemo.jfrog.io/artifactory/addbook-libs-release-local</url>
+        <name>a0rilrlhkukdq-artifactory-primary-0-releases</name>
+        <url>https://ranjeetdevops.jfrog.io/artifactory/demo-libs-release-local</url>
     </repository>
 </distributionManagement>
 </project>
