@@ -79,12 +79,11 @@ pipeline {
             steps {
                 script{
                     echo "publishing to by jfrog"
-                    sh "-U deploy -s settings.xml"
+                    sh "mvn -U deploy -s settings.xml"
                 }
                 
             }
             
         }
     }
-}
 }
