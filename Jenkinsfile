@@ -1,8 +1,8 @@
 pipeline {
-    agent none
+    agent any
 
     tools{
-        maven "mymaven"
+        maven "Mymaven"
     }
     
     parameters{
@@ -11,13 +11,8 @@ pipeline {
         choice(name:'APPVERSION',choices:['1.1','1.2','1.3'])
 
     }
-    environment{
-        BUILD_SERVER='ec2-user@172.31.3.48'
-    }
-
     stages {
         stage('Compile') {
-            agent any
             steps {
                 script{
                     echo "Compiling the code"
@@ -29,7 +24,6 @@ pipeline {
             
         }
         stage('CodeReview') {
-            agent any
             steps {
                 script{
                     echo "Code Review Using pmd plugin"
@@ -40,7 +34,6 @@ pipeline {
             
         }
          stage('UnitTest') {
-            agent any
             when{
                 expression{
                     params.executeTests == true
@@ -61,7 +54,6 @@ pipeline {
             
         }
         stage('CodeCoverage') {
-            agent {label 'linux_slave'}
             steps {
                 script{
                     echo "Code Coverage by jacoco"
@@ -72,24 +64,22 @@ pipeline {
             
         }
         stage('Package') {
-            agent any
-            input{
-                message "Select the platform for deployment"
-                ok "Platform Selected"
-                parameters{
-                    choice(name:'Platform',choices:['EKS','EC2','On-prem'])
-                }
-            }
             steps {
                 script{
-                    sshagent(['slave2']) {
                     echo "packaging the code"
                     echo 'platform is ${Platform}'
                     echo "packing the version ${params.APPVERSION}"
-                    //sh "mvn package"
-                    sh "scp  -o StrictHostKeyChecking=no server-script.sh ${BUILD_SERVER}:/home/ec2-user"
-                    sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/server-script.sh'"
-                    
+                    sh "mvn package"
+                }
+                
+            }
+            
+        }
+     stage('Publishtojfrog') {
+            steps {
+                script{
+                    echo "publishing to by jfrog"
+                    sh "-U deploy -s settings.xml"
                 }
                 
             }
