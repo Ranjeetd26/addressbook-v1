@@ -72,9 +72,9 @@ pipeline {
         }
         stage('Package') {
             agent any
-            sshagent(['slave2_ssh']) {
             steps {
                 script{
+                    sshagent(['slave2_ssh']) {
                     echo "packaging the code"
                     echo "packing the version ${params.APPVERSION}"
                     sh "scp -o StrictHostKeyChecking=no server-script.sh ${BUILD_SERVER}:/home/ec2-user"
