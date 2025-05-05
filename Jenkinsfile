@@ -11,8 +11,12 @@ pipeline {
         choice(name:'APPVERSION',choices:['1.1','1.2','1.3'])
 
     }
+    environment{
+        BUILD_SERVER = 'ec2-user@172.31.15.106'
+    
     stages {
         stage('Compile') {
+            agent any
             steps {
                 script{
                     echo "Compiling the code"
@@ -24,6 +28,7 @@ pipeline {
             
         }
         stage('CodeReview') {
+            agent any
             steps {
                 script{
                     echo "Code Review Using pmd plugin"
@@ -34,6 +39,7 @@ pipeline {
             
         }
          stage('UnitTest') {
+            agent any
             when{
                 expression{
                     params.executeTests == true
@@ -54,6 +60,7 @@ pipeline {
             
         }
         stage('CodeCoverage') {
+            agent any
             steps {
                 script{
                     echo "Code Coverage by jacoco"
@@ -64,18 +71,22 @@ pipeline {
             
         }
         stage('Package') {
+            agent any
+            sshagent(['slave2_ssh']) {
             steps {
                 script{
                     echo "packaging the code"
-                    echo 'platform is ${Platform}'
                     echo "packing the version ${params.APPVERSION}"
-                    sh "mvn package"
+                    sh "scp -o StrictHostKeyChecking=no server-script.sh ${BUILD_SERVER}:/home/ec2-user"
+                    sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/server-script.sh'"
                 }
                 
             }
             
         }
+        }
      stage('Publishtojfrog') {
+            agent any
             steps {
                 script{
                     echo "publishing to by jfrog"
