@@ -1,6 +1,6 @@
 sudo yum install java-17-amazon-corretto-devel -y
 sudo yum install git -y
-sudo yum install maven -y
+sudo yum install maven 3.9.9 -y
 
 if [ -d "addressbook-v1" ]
 then
