@@ -15,14 +15,14 @@ pipeline{
         IMAGE_NAME = 'ranjeetd26/addbook:$BUILD_NUMBER'
     }
     stages{
-        stage(complie){
+        stage('Compile'){
             agent any
             steps{
-                echo "complie the code in ${params.Env}"
+                echo "compile the code in ${params.Env}"
                 sh "mvn compile"
             }
         }
-        stage(UnitTest){
+        stage('UnitTest'){
             agent any
             when {
                 expression {
@@ -39,21 +39,21 @@ pipeline{
                 }
             }
         }
-        stage(CodeReview){
+        stage('CodeReview'){
             agent any
             script {
                 echo "Code review stage"
                 sh "mvn pmd:pmd"
             }
         }
-        stage(CodeCoverage){
+        stage('CodeCoverage'){
             agent any
             script {
                 echo "Code coverage stage"
                 sh "mvn verify"
             }
         }
-        stage(Dockerize Image And Push){
+        stage('Dockerize Image And Push'){
             agent any
             steps {
                 sshagent(["slave2"]) {
@@ -67,7 +67,7 @@ pipeline{
                 }
             }
         }
-        stage("Test/deploy docker image"){
+        stage('Test/deploy docker image'){
             agent any
             steps {
                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
