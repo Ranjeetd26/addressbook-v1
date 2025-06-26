@@ -62,7 +62,7 @@ pipeline {
             agent any
             steps {
                 sshagent(credentials: ['slave2']) {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
                         echo "Dockerizing and pushing to Docker Hub"
 
                         sh "scp -o StrictHostKeyChecking=no server-script.sh ${BUILD_SERVER}:/home/ec2-user/"
@@ -77,7 +77,7 @@ pipeline {
         stage('Test/Deploy Docker Image') {
             agent any
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
                     echo "Deploying the Docker image to ${params.Env} environment"
 
                     sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo yum install -y docker || true'"
