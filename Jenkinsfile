@@ -65,10 +65,10 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
                         echo "Dockerizing and pushing to Docker Hub"
 
-                        sh "scp -o StrictHostKeyChecking=no server-script.sh ${BUILD_SERVER}:/home/ec2-user"
-                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} bash /home/ec2-user/server-script.sh ${IMAGE_NAME}"
-                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} sudo docker login -u ${USERNAME} -p ${PASSWORD}"
-                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
+                        sh 'scp -o StrictHostKeyChecking=no server-script.sh ${BUILD_SERVER}:/home/ec2-user'
+                        sh 'ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} bash /home/ec2-user/server-script.sh ${IMAGE_NAME}'
+                        sh 'ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} sudo docker login -u ${USERNAME} -p ${PASSWORD}'
+                        sh 'ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}'
                     }
                 }
             }
