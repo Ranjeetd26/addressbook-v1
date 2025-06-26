@@ -1,4 +1,3 @@
-
 sudo yum install git -y
 sudo yum install docker -y
 sudo systemctl start docker
@@ -13,4 +12,6 @@ else
 fi
 
 cd /home/ec2-user/addressbook-v1
-docker build -t $1 .
+git checkout master 
+# mvn compile
+sudo docker build -t $1 .
