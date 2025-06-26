@@ -1,36 +1,38 @@
-pipeline{
+pipeline {
     agent none
+
     tools {
-        // jdk "myjava"
-        maven "mymaven"
+        maven 'Mymaven'
     }
+
     parameters {
         string(name: 'Env', defaultValue: 'Test', description: 'Environment to deploy')
-        booleanParam(name: 'executeTests', defaultValue: true, description: 'decide to run tc')
+        booleanParam(name: 'executeTests', defaultValue: true, description: 'Decide to run test cases')
         choice(name: 'APPVERSION', choices: ['1.1', '1.2', '1.3'], description: 'Select the application version')
     }
-    Environment{
+
+    environment {
         BUILD_SERVER = 'ec2-user@172.31.0.171'
         DEPLOY_SERVER = 'ec2-user@172.31.13.65'
-        IMAGE_NAME = 'ranjeetd26/addbook:$BUILD_NUMBER'
+        IMAGE_NAME = "ranjeetd26/addbook:${BUILD_NUMBER}"
     }
-    stages{
-        stage('Compile'){
+
+    stages {
+        stage('Compile') {
             agent any
-            steps{
-                echo "compile the code in ${params.Env}"
+            steps {
+                echo "Compile the code in ${params.Env}"
                 sh "mvn compile"
             }
         }
-        stage('UnitTest'){
+
+        stage('UnitTest') {
             agent any
             when {
-                expression {
-                    param.executeTests == true
-                }
+                expression { params.executeTests == true }
             }
-            script {
-                echo "test the code"
+            steps {
+                echo "Running unit tests"
                 sh "mvn test"
             }
             post {
@@ -39,43 +41,50 @@ pipeline{
                 }
             }
         }
-        stage('CodeReview'){
+
+        stage('CodeReview') {
             agent any
-            script {
-                echo "Code review stage"
+            steps {
+                echo "Running code review"
                 sh "mvn pmd:pmd"
             }
         }
-        stage('CodeCoverage'){
+
+        stage('CodeCoverage') {
             agent any
-            script {
-                echo "Code coverage stage"
+            steps {
+                echo "Running code coverage"
                 sh "mvn verify"
             }
         }
-        stage('Dockerize Image And Push'){
+
+        stage('Dockerize Image And Push') {
             agent any
             steps {
-                sshagent(["slave2"]) {
+                sshagent(credentials: ['slave2']) {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
-                       echo "Dockerize the application and push to Docker Hub"
-                       sh "scp -o StrictHostKeyChecking=no server-script.sh ${BUILD_SERVER}:/home/ec2-user"
-                       sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} bash /home/ec2-user/server-script.sh ${IMAGE_NAME}"
-                       sh "ssh ${BUILD_SERVER} sudo docker login -u ${Username} -p ${Password}"
-                       sh "ssh ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
+                        echo "Dockerizing and pushing to Docker Hub"
+
+                        sh "scp -o StrictHostKeyChecking=no server-script.sh ${BUILD_SERVER}:/home/ec2-user/"
+                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash /home/ec2-user/server-script.sh ${IMAGE_NAME}'"
+                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'sudo docker login -u ${Username} -p ${Password}'"
+                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'sudo docker push ${IMAGE_NAME}'"
                     }
                 }
             }
         }
-        stage('Test/deploy docker image'){
+
+        stage('Test/Deploy Docker Image') {
             agent any
             steps {
-               withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
-                   echo "Deploy the application to ${params.Env} environment"
-                   sh "scp -o StrictHostKeyChecking=no ${DEPLOY_SERVER} sudo yum install -y docker"
-                   sh "ssh ${DEPLOY_SERVER} sudo docker login -u ${Username} -p ${Password}"
-                   sh "ssh ${DEPLOY_SERVER} sudo docker run -itd -p 8080:8080 --name addbook ${IMAGE_NAME}"
-               }
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
+                    echo "Deploying the Docker image to ${params.Env} environment"
+
+                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo yum install -y docker || true'"
+                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo systemctl start docker || true'"
+                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo docker login -u ${Username} -p ${Password}'"
+                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo docker run -itd -p 8080:8080 --name addbook ${IMAGE_NAME}'"
+                }
             }
         }
     }
