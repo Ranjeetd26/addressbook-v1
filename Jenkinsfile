@@ -77,7 +77,8 @@ pipeline {
         stage('Test/Deploy Docker Image') {
             agent any
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
+                sshagent(['slave2']) {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
                     echo "Deploying the Docker image to ${params.Env} environment"
 
                     sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo yum install -y docker || true'"
