@@ -67,7 +67,7 @@ pipeline {
 
                         sh "scp -o StrictHostKeyChecking=no server-script.sh ${BUILD_SERVER}:/home/ec2-user/"
                         sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash /home/ec2-user/server-script.sh ${IMAGE_NAME}'"
-                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'sudo docker login -u ${Username} -p ${Password}'"
+                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'sudo docker login -u ${Username} -P ${Password}'"
                         sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'sudo docker push ${IMAGE_NAME}'"
                     }
                 }
@@ -82,7 +82,7 @@ pipeline {
 
                     sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo yum install -y docker || true'"
                     sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo systemctl start docker || true'"
-                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo docker login -u ${Username} -p ${Password}'"
+                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo docker login -u ${Username} -P ${Password}'"
                     sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo docker run -itd -P ${IMAGE_NAME}'"
                 }
             }
