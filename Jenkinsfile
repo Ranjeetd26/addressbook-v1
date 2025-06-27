@@ -79,14 +79,15 @@ pipeline {
             steps {
                 sshagent(['slave2']) {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
-                    echo "Deploying the Docker image to ${params.Env} environment"
+                        echo "Deploying the Docker image to ${params.Env} environment"
 
-                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo yum install -y docker || true'"
-                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo systemctl start docker || true'"
-                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'echo \"${PASSWORD}\" | sudo docker login -u \"${USERNAME}\" --password-stdin'"
-                    sh "ssh ${DEPLOY_SERVER} sudo docker run -itd -P ${IMAGE_NAME}"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo yum install -y docker || true'"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo systemctl start docker || true'"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'echo \"${PASSWORD}\" | sudo docker login -u \"${USERNAME}\" --password-stdin'"
+                        sh "ssh ${DEPLOY_SERVER} sudo docker run -itd -P ${IMAGE_NAME}"
+                    }
                 }
-            }
+            } 
         }
     }
 }
