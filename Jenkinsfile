@@ -83,7 +83,7 @@ pipeline {
                     sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo yum install -y docker || true'"
                     sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo systemctl start docker || true'"
                     sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo docker login -u ${Username} -p ${Password}'"
-                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo docker run -itd -p 8080:8080 --name addbook ${IMAGE_NAME}'"
+                    sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo docker run -itd -P ${IMAGE_NAME}'"
                 }
             }
         }
